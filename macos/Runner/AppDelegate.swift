@@ -1,4 +1,5 @@
 import Cocoa
+import file_open_handler
 import FlutterMacOS
 
 @NSApplicationMain
@@ -37,4 +38,10 @@ class AppDelegate: FlutterAppDelegate {
         return output
     }
     
+    override func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        
+        FileOpenHandlerPlugin.instance.handleFileOpen(pathname: filename);
+        // Return true if your app opened the file successfully, false otherwise
+        return true
+    }
 }

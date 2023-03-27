@@ -153,6 +153,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "6.1.4"
+  file_open_handler:
+    dependency: "direct main"
+    description:
+      name: file_open_handler
+      sha256: "4efc4f20559c3d19370bd8ff6ebc7191a74c452fdbf6d2c0c620020b90e671c8"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.2"
+  fl_shared_link:
+    dependency: "direct main"
+    description:
+      name: fl_shared_link
+      sha256: f9c0da5cdedccad1a51d570a57bc7a7289b345846fe7fab08738f397248f644d
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.3"
   flutter:
     dependency: "direct main"
     description: flutter

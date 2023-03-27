@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fl_shared_link/fl_shared_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
@@ -14,6 +15,7 @@ import 'package:tencent_cos/tencent_cos.dart';
 import 'package:path/path.dart' as p;
 import 'WindowSizeService.dart';
 import 'logutil.dart';
+import 'package:file_open_handler/file_open_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +24,7 @@ Future<void> main() async {
     windowSizeService.initialize();
   }
   //日志
-  LogUtil().initLogger();
+  await LogUtil().initLogger();
 
   void reportErrorAndLog(FlutterErrorDetails details) {
     final errorMsg = {
@@ -98,8 +100,13 @@ class _MyHomePageState extends State<MyHomePage> {
   String region = "";
 
   final _inputFocusNode = FocusNode();
+  final _fileOpenHandlerPlugin = FileOpenHandler();
+  String? openedFile;
 
-  _MyHomePageState() {
+  @override
+  void initState() {
+    super.initState();
+
     //初始化Cos
     rootBundle.loadString(".cos").then((value) {
       Map<String, dynamic> str = jsonDecode(value);
@@ -116,14 +123,45 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         openAlog = box.hasData(openAlogFlag) ? box.read(openAlogFlag) : true;
         pythonPath =
-            box.hasData(pythonPathFlag) ? box.read(pythonPathFlag) : "";
+        box.hasData(pythonPathFlag) ? box.read(pythonPathFlag) : "";
       });
+
+      initPlatformState();
     });
 
     //将脚本从项目copy到磁盘
     copyScriptToDesk("decompress_clog.py").then((value) => clog = value);
     copyScriptToDesk("decode_mars_nocrypt_log_file.py")
         .then((value) => xlog = value);
+  }
+
+  Future<void> initPlatformState() async {
+    try {
+      _fileOpenHandlerPlugin.setOnFileDroppedCallback((String? filepath) {
+        if (filepath != null) {
+          logger.i("filepath：$filepath");
+          onDragDone(
+              filepath,
+              p.extension(filepath) == ".clog" ||
+                  p.extension(filepath) == ".xlog");
+        }
+      });
+
+      openedFile = await _fileOpenHandlerPlugin.getOpenedFile();
+      if (openedFile != null) {
+        if (openedFile!.isNotEmpty && openedFile != "no file") {
+          logger.i("openedFile：$openedFile");
+          onDragDone(
+              openedFile!,
+              p.extension(openedFile!) == ".clog" ||
+                  p.extension(openedFile!) == ".xlog");
+        }
+      }
+    } on PlatformException {
+      openedFile = 'Failed to get opened file.';
+    }
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
@@ -192,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 DropTarget(
                   onDragDone: (detail) async {
-                    await onDragDone(detail, true);
+                    await onDragDone(detail.files[0].path, true);
                   },
                   onDragEntered: (detail) {
                     setState(() {
@@ -220,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 DropTarget(
                   onDragDone: (detail) async {
-                    await onDragDone(detail, false);
+                    await onDragDone(detail.files[0].path, false);
                   },
                   onDragEntered: (detail) {
                     setState(() {
@@ -252,9 +290,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //拖动结束
-  Future<void> onDragDone(DropDoneDetails detail, needDecode) async {
+  Future<void> onDragDone(String path, needDecode) async {
     logger.i("onDragDone");
-    var path = detail.files[0].path;
     File finalFile;
     if (needDecode) {
       try {

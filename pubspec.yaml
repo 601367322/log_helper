@@ -55,6 +55,8 @@ dependencies:
   bot_toast: ^4.0.3
   process_run: ^0.12.5+2
   archive: ^3.3.6
+  fl_shared_link: ^0.0.3
+  file_open_handler: ^0.0.2
 
 dev_dependencies:
   flutter_test:
