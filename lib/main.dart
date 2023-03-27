@@ -265,11 +265,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           var result1 = await runScript("'$pythonPath' '$xlog' '$path'");
           var result2 = await runScript("'$pythonPath' '$clog' '$path'");
-
-          if (result1.isNotEmpty || result2.isNotEmpty) {
-            BotToast.showText(text: "日志文件损坏，无法解析");
-            return;
-          }
         } else {
           await Process.start("python", [xlog, path]);
           await Process.start("python", [clog, path]);
