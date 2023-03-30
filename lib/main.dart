@@ -325,7 +325,7 @@ class _MyHomePageState extends State<MyHomePage> {
         BotToast.showText(text: "正在上传");
         String token = "";
         String localPath = finalFile.path;
-        String cosPath = "log/${getRandomName()}_${p.basename(finalFile.path)}";
+        String cosPath = "log/${getRandomName()}${p.extension(finalFile.path)}";
         logger.i("正在上传$localPath");
         setState(() {
           uploading = true;
@@ -391,7 +391,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final random = Random();
 
     // 生成一个6位的随机字符串
-    final codeUnits = List.generate(6, (index) {
+    final codeUnits = List.generate(11, (index) {
       final randomIndex = random.nextInt(characters.length);
       return characters.codeUnitAt(randomIndex);
     });
