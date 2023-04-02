@@ -5,7 +5,7 @@ import 'package:window_size/window_size.dart' as window_size;
 import 'package:window_size/window_size.dart';
 
 class WindowSizeService {
-  static const double width = 601;
+  static const double width = 400;
   static const double height = 487;
 
   Future<PlatformWindow> _getPlatformWindow() async {

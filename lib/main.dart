@@ -123,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         openAlog = box.hasData(openAlogFlag) ? box.read(openAlogFlag) : true;
         pythonPath =
-        box.hasData(pythonPathFlag) ? box.read(pythonPathFlag) : "";
+            box.hasData(pythonPathFlag) ? box.read(pythonPathFlag) : "";
       });
 
       initPlatformState();
@@ -140,10 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _fileOpenHandlerPlugin.setOnFileDroppedCallback((String? filepath) {
         if (filepath != null) {
           logger.i("filepath：$filepath");
-          onDragDone(
-              filepath,
-              p.extension(filepath) == ".clog" ||
-                  p.extension(filepath) == ".xlog");
+          onDragDone(filepath, checkNeedDecode(openedFile!));
         }
       });
 
@@ -151,10 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (openedFile != null) {
         if (openedFile!.isNotEmpty && openedFile != "no file") {
           logger.i("openedFile：$openedFile");
-          onDragDone(
-              openedFile!,
-              p.extension(openedFile!) == ".clog" ||
-                  p.extension(openedFile!) == ".xlog");
+          onDragDone(openedFile!, checkNeedDecode(openedFile!));
         }
       }
     } on PlatformException {
@@ -230,7 +224,8 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 DropTarget(
                   onDragDone: (detail) async {
-                    await onDragDone(detail.files[0].path, true);
+                    await onDragDone(detail.files[0].path,
+                        checkNeedDecode(detail.files[0].path));
                   },
                   onDragEntered: (detail) {
                     setState(() {
@@ -249,35 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ? Colors.blue.withOpacity(0.4)
                         : Colors.black26,
                     child: _list.isEmpty
-                        ? const Center(child: Text("拖入.xlog、.clog日志"))
-                        : Text(_list[0].path),
-                  ),
-                ),
-                const SizedBox(
-                  width: 1,
-                ),
-                DropTarget(
-                  onDragDone: (detail) async {
-                    await onDragDone(detail.files[0].path, false);
-                  },
-                  onDragEntered: (detail) {
-                    setState(() {
-                      _dragging1 = true;
-                    });
-                  },
-                  onDragExited: (detail) {
-                    setState(() {
-                      _dragging1 = false;
-                    });
-                  },
-                  child: Container(
-                    height: 400,
-                    width: 200,
-                    color: _dragging1
-                        ? Colors.blue.withOpacity(0.4)
-                        : Colors.black26,
-                    child: _list.isEmpty
-                        ? const Center(child: Text("拖入.log日志"))
+                        ? const Center(child: Text("拖入.xlog、.clog、.log日志"))
                         : Text(_list[0].path),
                   ),
                 ),
@@ -398,5 +365,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final randomString = String.fromCharCodes(codeUnits);
     return randomString;
+  }
+
+  bool checkNeedDecode(String fileName) {
+    if ((p.extension(fileName) == ".clog" ||
+            p.extension(fileName) == ".xlog") &&
+        !p.basename(fileName).contains("_R_")) {
+      return true;
+    }
+    return false;
   }
 }
